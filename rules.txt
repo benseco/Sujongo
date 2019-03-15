@@ -1,0 +1,98 @@
+Competitive Sudoku Rules
+
+---Who is Black---
+Each player draws a card.
+In the case of same draw, draw another card and compute the sum.
+The player with the higher card or sum of cards is the Black player and drafts first.
+
+---Draft Modes---
+1. Draft
+Draft pool consists of 10 random cards, 5 of each color (ie. r1 b2 r2 b3 r5 b6 r7 b9 r9 b9).
+Each player chooses 5 cards out of the draft pool, one at a time, in turns.
+
+2. Twins
+Each player is assigned the same set of 5 random cards (ie. both players are assigned 14558).
+
+2. Twins Draft
+Draft pool consists of 5 pairs of random cards (ie. r1 b1 r5 b5 r2 b2 r6 b6 r6 b6).
+Each player chooses 5 cards out of the draft pool, one at a time, in turns.
+
+---Post Draft---
+Each player puts each of their 5 cards into one of the 9 positions on their Grid.
+
+---Drawing for the table---
+The remaining cards in each color are shuffled and placed as Decks in front of each player.
+Each player draws 2 cards from their Deck and places them in the center of the table. 
+The general Pool is comprised of 2 colored Pools of 2 Stacks each.
+
+---Gameplay---
+The game is played in turns.
+If playing in a Draft Mode:
+	The Red player gets the first turn.
+If playing in a non-Draft Mode:
+	Compute the sum of the Pool cards of each color. 
+	The player whose color is the highest sum gets the first turn. 
+On their turn, a player may:
+	Draw a card from the Pool (either color) from the top of a Stack
+	OR
+	Draw a card from their Deck
+If the player has empty positions on their Grid:
+	The drawn card must be placed in an empty position.
+If the player has no empty positions on their Grid:
+	The player may:
+		Swap the drawn card into a position on their Grid.
+		OR
+		Place the drawn card directly into the Pool of its color.
+If a card is returned to the Pool of its color:
+	If the Pool of its color is comprised of 1 Stack:
+		The card is placed in the Pool on the table.
+	If the Pool of its color is comprised of 2 Stacks:
+		The card is placed on top of another card, to a maximum Stack height of 2.
+		This may cause the Pool to become Flooded.
+At the end of the player's turn, if either colored Pool has only 1 stack:
+	Draw a card from the Deck of that color and place it in the Pool.
+If the player's action causes their Grid to be a winning hand:
+	The player must call the hand and end the game. 
+
+---Flooded Pool---
+A pool with 4 cards of a single color (2 Stacks of 2 cards) is considered Flooded.
+A player who starts their turn with a Flooded Pool must use that turn to draw a new Pool.
+The cards in the Flooded Pool are moved to the player's Discard Pile and can no longer be accessed.
+The player then draws 2 cards that become the new Pool of that color.
+The player cannot take another action on this turn.
+
+---Exhausted Deck---
+A player who starts their turn with an empty Deck cannot take any action.
+The opponent may continue to take turns until they complete a winning hand or exhaust their own Deck.
+If both Decks have been exhausted:
+	Each player chooses either to Concede or Continue.
+	If both players choose to Concede:
+		The game is considered a draw and both players are awarded 0 points.
+	If one player Concedes and the other Continues:
+		If the conceding player has the more valuable hand:
+			The conceding player is awarded 6 points.
+			The continuing player is awarded 0 points.
+		If the continuing player has the more valuable hand:
+			Both players are awarded the value of their hands.
+	If both players choose to Continue:
+		The players trade Decks, shuffle, and draw for the table again.
+
+---Winning Hands---
+A winning hand is a Grid configuration where every row and every column meets one of the following qualifications:
+	Triplets (ie 333, 777, 999)
+	One-straights (ie 123, 645, 987)
+	Two-straights (ie 357, 684, 642 )
+	Three-straights (ie 147, 825, 963)
+	Power series (any order of 248)
+A winning hand must not use every digit, in other words, 123456789 is not a winning hand.
+
+---Scoring---
+The first player to complete a hand is awarded 3 points.
+Each triplet is awarded 3 points
+Each straight in mixed color is awarded 1 point
+Each straight in single color is awarded 2 points
+(Optional) A sequence of 248 is awarded 3 points
+Diagonals that meet qualification are also awarded points equal to their value as a row or column.
+
+---(Optional) Special Scoring---
+A hand of 3 triplets is awarded 3 extra points

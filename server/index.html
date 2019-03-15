@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+    var socket;
+
+    function div(attr) {
+        return $('<div/>', attr);
+    }
+
+    function valueToName(value)
+    {
+        switch(value)
+        {
+            case 1: return "one";
+            case 2: return "two";
+            case 3: return "three";
+            case 4: return "four";
+            case 5: return "five";
+            case 6: return "six";
+            case 7: return "seven";
+            case 8: return "eight";
+            case 9: return "nine";
+            default: return "back";
+        }
+    }
+
+    function selectableDeck(count) {
+        return deck(count)
+            .hover(function() {
+                $(this).addClass('deckHover');
+            }, function() {
+                $(this).removeClass('deckHover');
+            })
+            .click(function() {
+                socket.emit('draw');
+            });
+    }
+
+    function onDrawn(drawn) {
+        $('.selected').removeClass('selected'); 
+        $('#player').append(card(drawn.value, drawn.color + ' selected drawn'));
+    }
+
+    function deck(count) {
+        var deck = back('deck');
+        return deck.append(div({text:count,class:'count'}))
+    }
+
+    function back(type) {
+        return card('','back ' + type)
+    }
+
+    function card(value, type) {
+        var name=valueToName(value);
+        return div()
+            .addClass('card')
+            .append(div({text:value}))
+            .append(div({text:name}))
+            .append(div({text:name}))
+            .append(div({text:value}))
+            .addClass(type);
+    }
+
+    function selectableCard(value, type)
+    {
+        return card(value, type)
+            .click(function() {
+                $('.selected').removeClass('selected'); 
+                $(this).addClass('selected');
+            });
+    }
+
+    function table(data) {
+        $('#player').empty();
+        $('#opponent').empty();
+
+        var player = data.player;
+        var opponent = data.opponent;
+
+        var cardFunction = card;
+        if (player.turn) { cardFunction = selectableCard; }
+
+        if (player[1]) $('#player').append(cardFunction(player[1].value, player[1].color + ' row1 col1'));
+        if (player[2]) $('#player').append(cardFunction(player[4].value, player[4].color + ' row1 col2'));
+        if (player[3]) $('#player').append(cardFunction(player[7].value, player[7].color + ' row1 col3'));
+        if (player[4]) $('#player').append(cardFunction(player[2].value, player[2].color + ' row2 col1'));
+        if (player[5]) $('#player').append(cardFunction(player[5].value, player[5].color + ' row2 col2'));
+        if (player[6]) $('#player').append(cardFunction(player[8].value, player[8].color + ' row2 col3'));
+        if (player[7]) $('#player').append(cardFunction(player[3].value, player[3].color + ' row3 col1'));
+        if (player[8]) $('#player').append(cardFunction(player[6].value, player[6].color + ' row3 col2'));
+        if (player[9]) $('#player').append(cardFunction(player[9].value, player[9].color + ' row3 col3'));
+        if (player.deck) $('#player').append(selectableDeck(player.deck));
+        if (player.stack1[0]) $('#player').append(cardFunction(player.stack1[0], player.color + ' stack1 stackBottom'));
+        if (player.stack1[1]) $('#player').append(cardFunction(player.stack1[1], player.color + ' stack1 stackTop'));
+        if (player.stack2[0]) $('#player').append(cardFunction(player.stack2[0], player.color + ' stack2 stackBottom'));
+        if (player.stack2[1]) $('#player').append(cardFunction(player.stack2[1], player.color + ' stack2 stackTop'));
+
+        if (opponent[1]) $('#opponent').append(back('row1 col1'));
+        if (opponent[2]) $('#opponent').append(back('row1 col2'));
+        if (opponent[3]) $('#opponent').append(back('row1 col3'));
+        if (opponent[4]) $('#opponent').append(back('row2 col1'));
+        if (opponent[5]) $('#opponent').append(back('row2 col2'));
+        if (opponent[6]) $('#opponent').append(back('row2 col3'));
+        if (opponent[7]) $('#opponent').append(back('row3 col1'));
+        if (opponent[8]) $('#opponent').append(back('row3 col2'));
+        if (opponent[9]) $('#opponent').append(back('row3 col3'));
+        if (opponent.deck) $('#opponent').append(deck(opponent.deck));
+        if (opponent.stack1[0]) $('#opponent').append(cardFunction(opponent.stack1[0], opponent.color + ' stack1 stackBottom'));
+        if (opponent.stack1[1]) $('#opponent').append(cardFunction(opponent.stack1[1], opponent.color + ' stack1 stackTop'));
+        if (opponent.stack2[0]) $('#opponent').append(cardFunction(opponent.stack2[0], opponent.color + ' stack2 stackBottom'));
+        if (opponent.stack2[1]) $('#opponent').append(cardFunction(opponent.stack2[1], opponent.color + ' stack2 stackTop'));
+    }
+
+    function resize() {
+        var playarea = $('#playarea');
+        var height = playarea.height();
+        playarea.css('font-size', Math.floor(height / 52) * 2 + 'px');
+    }
+
+    $(function () {
+        socket = io();
+
+        socket.on('alert', function(msg) { alert(msg); });
+        socket.on('sys', function (msg) {
+            div({ text: "System: " + msg }).addClass('sysMsg').appendTo('#chatMessages');
+        });
+        socket.on('chat', function (obj) {
+            div({ text: obj.sender + ": " + obj.msg }).appendTo('#chatMessages');
+        });
+        socket.on('update', table);
+        socket.on('drawn', onDrawn);
+
+        $("#join").click(function () {
+            socket.emit('join',
+                $("#myID").val(),
+                $("#joinID").val());
+        });
+
+        $('#message').on('keypress', function (e) {
+            if (e.which === 13) {
+                socket.emit('chat', $(this).val());
+                $(this).val('');
+            }
+        });
+
+        resize();
+        $(window).resize(resize);
+    });
+</script>
+
+<head>
+    <title>Competitive Sudoku</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+
+            cursor: default;
+        }
+
+
+        #view {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            flex-direction: row;
+        }
+
+        #menu {
+            flex: 0 0 auto;
+            width: 14em;
+        }
+
+        #chat {
+            flex: 0 0 auto;
+            width: 24em;
+            border: 1px solid black;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chatMessages {
+            flex: 1 0 auto;
+        }
+
+        .sysMsg {
+            color: gray;
+        }
+
+        #playarea {
+            font-size: 200%;
+            flex: 1 0 auto;
+            position: relative;
+        }
+
+        #playarea > div {
+            position: absolute;
+            left: 50%;
+        }
+
+        .card {
+            width: 3em;
+            height: 4em;
+            padding: .25em;
+            border-radius: .25em;
+            font-family: "Arial Black";
+            background-color: white;
+            opacity: .9;
+            position: absolute
+        }
+
+        .card,
+        .card * {
+            cursor: grab;
+        }
+
+        .selected {
+            background-image: linear-gradient(to right, powderblue, thistle)
+        }
+        
+        .back {
+            background-color: black;
+            color: white;
+            border: 1px solid white;
+        }
+
+        .black {
+            color: black;
+            border: 1px solid black;
+        }
+
+        .red {
+            color: red;
+            border: 1px solid red;
+        }
+
+        .card>div:nth-child(1) {
+            position: absolute;
+            top: 0em;
+            left: .25em;
+        }
+
+        .card>div:nth-child(2),
+        .card>div:nth-child(3) {
+            transform-origin: top left;
+            text-align: center;
+            position: absolute;
+            width: 3.5em;
+            opacity: .5;
+        }
+
+        .card>div:nth-child(2) {
+            transform: rotate(-45deg);
+            top: 2.2em;
+            left: -0.4em;
+        }
+
+        .card>div:nth-child(3) {
+            transform: rotate(135deg);
+            bottom: 0.83em;
+            left: 3.33em;
+        }
+
+        .card>div:nth-child(4) {
+            position: absolute;
+            transform: rotate(180deg);
+            bottom: 0em;
+            right: 0.25em;
+        }
+
+        #player {
+            top: calc(50% + 0.25em);
+        }
+
+        #opponent {
+            top: calc(50% - 0.25em);
+            transform: rotate(180deg);
+        }
+
+        #opponent .deck {
+            transform: rotate(180deg);
+            top: 1em;
+        }
+
+        #player .deck {
+            top: -1em;
+        }
+
+        .deck {
+            left: -6.5em;
+            box-shadow: 0 1em gray; 
+        }
+
+        .deckHover {
+            background-color: darkgoldenrod;
+        }
+
+        .drawn {
+            top: 4.25em;
+            left: -6.5em;
+        }
+
+        .count {
+            bottom: -1.25em;
+            position: absolute;
+            left: .75em;
+        }
+
+        .stack1 {
+            left: -3em;
+        }
+
+        .stack2 {
+
+        }
+
+        .stackTop {
+            top: 1.25em;
+        }
+
+        .stackBottom {
+
+        }
+
+        .row1 {
+            top: 6em;
+        }
+
+        .row2 {
+            top: 7.25em;
+        }
+
+        .row3 {
+            top: 8.5em;
+        }
+
+        .col1 {
+            left: -2.75em;
+        }
+
+        .col2 {
+            left: -1.5em;
+        }
+
+        .col3 {
+            left: -0.25em;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="view">
+        <div id="menu">
+            <div>Your game ID:</div>
+            <input id="myID" type="text" />
+            <div>Join a game:</div>
+            <input id="joinID" type="text" />
+            <button id="join">Join!</button>
+        </div>
+        <div id="playarea">
+            <div id="opponent"></div>
+            <div id="player"></div>
+        </div>
+        <div id="chat">
+            <div id="chatMessages"></div>
+            <input id="message" type="text" />
+        </div>
+    </div>
+</body>
+
+</html>
