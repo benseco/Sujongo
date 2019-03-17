@@ -40,6 +40,8 @@
 
     function onDrawn(drawn) {
         $('.selected').removeClass('selected'); 
+        $('.deck').off('mouseenter mouseleave');
+        $('.deck, .stack1.card, .stack2.card').off('click');
         $('#player').append(card(drawn.value, drawn.color + ' selected drawn'));
     }
 
@@ -82,20 +84,30 @@
         var cardFunction = card;
         if (player.turn) { cardFunction = selectableCard; }
 
-        if (player[1]) $('#player').append(cardFunction(player[1].value, player[1].color + ' row1 col1'));
-        if (player[2]) $('#player').append(cardFunction(player[4].value, player[4].color + ' row1 col2'));
-        if (player[3]) $('#player').append(cardFunction(player[7].value, player[7].color + ' row1 col3'));
-        if (player[4]) $('#player').append(cardFunction(player[2].value, player[2].color + ' row2 col1'));
-        if (player[5]) $('#player').append(cardFunction(player[5].value, player[5].color + ' row2 col2'));
-        if (player[6]) $('#player').append(cardFunction(player[8].value, player[8].color + ' row2 col3'));
-        if (player[7]) $('#player').append(cardFunction(player[3].value, player[3].color + ' row3 col1'));
-        if (player[8]) $('#player').append(cardFunction(player[6].value, player[6].color + ' row3 col2'));
-        if (player[9]) $('#player').append(cardFunction(player[9].value, player[9].color + ' row3 col3'));
+        if (player[1]) $('#player').append(card(player[1].value, player[1].color + ' row1 col1'));
+        if (player[2]) $('#player').append(card(player[4].value, player[4].color + ' row1 col2'));
+        if (player[3]) $('#player').append(card(player[7].value, player[7].color + ' row1 col3'));
+        if (player[4]) $('#player').append(card(player[2].value, player[2].color + ' row2 col1'));
+        if (player[5]) $('#player').append(card(player[5].value, player[5].color + ' row2 col2'));
+        if (player[6]) $('#player').append(card(player[8].value, player[8].color + ' row2 col3'));
+        if (player[7]) $('#player').append(card(player[3].value, player[3].color + ' row3 col1'));
+        if (player[8]) $('#player').append(card(player[6].value, player[6].color + ' row3 col2'));
+        if (player[9]) $('#player').append(card(player[9].value, player[9].color + ' row3 col3'));
         if (player.deck) $('#player').append(selectableDeck(player.deck));
-        if (player.stack1[0]) $('#player').append(cardFunction(player.stack1[0], player.color + ' stack1 stackBottom'));
-        if (player.stack1[1]) $('#player').append(cardFunction(player.stack1[1], player.color + ' stack1 stackTop'));
-        if (player.stack2[0]) $('#player').append(cardFunction(player.stack2[0], player.color + ' stack2 stackBottom'));
-        if (player.stack2[1]) $('#player').append(cardFunction(player.stack2[1], player.color + ' stack2 stackTop'));
+        if (player.stack1[1]) {
+            if (player.stack1[0]) $('#player').append(card(player.stack1[0], player.color + ' stack1 stackBottom'));
+            if (player.stack1[1]) $('#player').append(cardFunction(player.stack1[1], player.color + ' stack1 stackTop'));
+        }
+        else if (player.stack1[0]) {
+            if (player.stack1[0]) $('#player').append(cardFunction(player.stack1[0], player.color + ' stack1 stackBottom'));
+        }
+        if (player.stack2[1]) {
+            if (player.stack2[0]) $('#player').append(card(player.stack2[0], player.color + ' stack2 stackBottom'));
+            if (player.stack2[1]) $('#player').append(cardFunction(player.stack2[1], player.color + ' stack2 stackTop'));
+        }
+        else if (player.stack2[0]) {
+            if (player.stack2[0]) $('#player').append(cardFunction(player.stack2[0], player.color + ' stack2 stackBottom'));
+        }
 
         if (opponent[1]) $('#opponent').append(back('row1 col1'));
         if (opponent[2]) $('#opponent').append(back('row1 col2'));
@@ -107,10 +119,20 @@
         if (opponent[8]) $('#opponent').append(back('row3 col2'));
         if (opponent[9]) $('#opponent').append(back('row3 col3'));
         if (opponent.deck) $('#opponent').append(deck(opponent.deck));
-        if (opponent.stack1[0]) $('#opponent').append(cardFunction(opponent.stack1[0], opponent.color + ' stack1 stackBottom'));
-        if (opponent.stack1[1]) $('#opponent').append(cardFunction(opponent.stack1[1], opponent.color + ' stack1 stackTop'));
-        if (opponent.stack2[0]) $('#opponent').append(cardFunction(opponent.stack2[0], opponent.color + ' stack2 stackBottom'));
-        if (opponent.stack2[1]) $('#opponent').append(cardFunction(opponent.stack2[1], opponent.color + ' stack2 stackTop'));
+        if (opponent.stack1[1]) {
+            if (opponent.stack1[0]) $('#opponent').append(card(opponent.stack1[0], opponent.color + ' stack1 stackBottom'));
+            if (opponent.stack1[1]) $('#opponent').append(cardFunction(opponent.stack1[1], opponent.color + ' stack1 stackTop'));
+        }
+        else if (opponent.stack1[0]) {
+            if (opponent.stack1[0]) $('#opponent').append(cardFunction(opponent.stack1[0], opponent.color + ' stack1 stackBottom'));
+        }
+        if (opponent.stack2[1]) {
+            if (opponent.stack2[0]) $('#opponent').append(card(opponent.stack2[0], opponent.color + ' stack2 stackBottom'));
+            if (opponent.stack2[1]) $('#opponent').append(cardFunction(opponent.stack2[1], opponent.color + ' stack2 stackTop'));
+        }
+        else if (opponent.stack2[0]) {
+            if (opponent.stack2[0]) $('#opponent').append(cardFunction(opponent.stack2[0], opponent.color + ' stack2 stackBottom'));
+        }
     }
 
     function resize() {
