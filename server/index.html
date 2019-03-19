@@ -239,7 +239,7 @@
             font-family: "Arial Black";
             background-color: white;
             opacity: .9;
-            position: absolute
+            position: absolute;
         }
 
         .card,
@@ -301,11 +301,11 @@
             right: 0.25em;
         }
 
-        #player {
+        #player, .player {
             top: calc(50% + 0.25em);
         }
 
-        #opponent {
+        #opponent, .opponent {
             top: calc(50% - 0.25em);
             transform: rotate(180deg);
         }
@@ -370,6 +370,20 @@
         .col3 {
             left: -0.25em;
         }
+
+        .target {
+            width: 1.3em;
+            height: 1.3em;
+            border: .1em solid blue;
+            position: absolute;
+            z-index: 1;
+            opacity: .3;
+            cursor: pointer;
+        }
+
+        .target:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -383,8 +397,34 @@
             <button id="join">Join!</button>
         </div>
         <div id="playarea">
-            <div id="opponent"></div>
-            <div id="player"></div>
+            <div id="opponent">
+            </div>
+            <div id="player">
+            </div>
+            <div class="opponent">
+                <!--Far stacks-->
+                <div class="target stack1 stackBottom"></div>
+                <div class="target stack1 stackTop"></div>
+                <div class="target stack2 stackBottom"></div>
+                <div class="target stack2 stackTop"></div>
+            </div>
+            <div class="player">
+                <!--Near stacks-->
+                <div class="target stack1 stackBottom"></div>
+                <div class="target stack1 stackTop"></div>
+                <div class="target stack2 stackBottom"></div>
+                <div class="target stack2 stackTop"></div>
+                <!--Hand-->
+                <div class="target row1 col1"></div>
+                <div class="target row1 col2"></div>
+                <div class="target row1 col3"></div>
+                <div class="target row2 col1"></div>
+                <div class="target row2 col2"></div>
+                <div class="target row2 col3"></div>
+                <div class="target row3 col1"></div>
+                <div class="target row3 col2"></div>
+                <div class="target row3 col3"></div>
+            </div>
         </div>
         <div id="chat">
             <div id="chatMessages"></div>
