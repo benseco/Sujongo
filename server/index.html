@@ -65,12 +65,13 @@
             .addClass(type);
     }
 
-    function selectableCard(value, type)
+    function selectableStack(value, type)
     {
         return card(value, type)
             .click(function() {
                 $('.selected').removeClass('selected'); 
                 $(this).addClass('selected');
+                $('.target.row1, .target.row2, .target.row3').show();
             });
     }
 
@@ -81,8 +82,8 @@
         var player = data.player;
         var opponent = data.opponent;
 
-        var cardFunction = card;
-        if (player.turn) { cardFunction = selectableCard; }
+        var stackFunction = card;
+        if (player.turn) { stackFunction = selectableStack; }
 
         if (player[1]) $('#player').append(card(player[1].value, player[1].color + ' row1 col1'));
         if (player[2]) $('#player').append(card(player[4].value, player[4].color + ' row1 col2'));
@@ -96,17 +97,17 @@
         if (player.deck) $('#player').append(selectableDeck(player.deck));
         if (player.stack1[1]) {
             if (player.stack1[0]) $('#player').append(card(player.stack1[0], player.color + ' stack1 stackBottom'));
-            if (player.stack1[1]) $('#player').append(cardFunction(player.stack1[1], player.color + ' stack1 stackTop'));
+            if (player.stack1[1]) $('#player').append(stackFunction(player.stack1[1], player.color + ' stack1 stackTop'));
         }
         else if (player.stack1[0]) {
-            if (player.stack1[0]) $('#player').append(cardFunction(player.stack1[0], player.color + ' stack1 stackBottom'));
+            if (player.stack1[0]) $('#player').append(stackFunction(player.stack1[0], player.color + ' stack1 stackBottom'));
         }
         if (player.stack2[1]) {
             if (player.stack2[0]) $('#player').append(card(player.stack2[0], player.color + ' stack2 stackBottom'));
-            if (player.stack2[1]) $('#player').append(cardFunction(player.stack2[1], player.color + ' stack2 stackTop'));
+            if (player.stack2[1]) $('#player').append(stackFunction(player.stack2[1], player.color + ' stack2 stackTop'));
         }
         else if (player.stack2[0]) {
-            if (player.stack2[0]) $('#player').append(cardFunction(player.stack2[0], player.color + ' stack2 stackBottom'));
+            if (player.stack2[0]) $('#player').append(stackFunction(player.stack2[0], player.color + ' stack2 stackBottom'));
         }
 
         if (opponent[1]) $('#opponent').append(back('row1 col1'));
@@ -121,17 +122,17 @@
         if (opponent.deck) $('#opponent').append(deck(opponent.deck));
         if (opponent.stack1[1]) {
             if (opponent.stack1[0]) $('#opponent').append(card(opponent.stack1[0], opponent.color + ' stack1 stackBottom'));
-            if (opponent.stack1[1]) $('#opponent').append(cardFunction(opponent.stack1[1], opponent.color + ' stack1 stackTop'));
+            if (opponent.stack1[1]) $('#opponent').append(stackFunction(opponent.stack1[1], opponent.color + ' stack1 stackTop'));
         }
         else if (opponent.stack1[0]) {
-            if (opponent.stack1[0]) $('#opponent').append(cardFunction(opponent.stack1[0], opponent.color + ' stack1 stackBottom'));
+            if (opponent.stack1[0]) $('#opponent').append(stackFunction(opponent.stack1[0], opponent.color + ' stack1 stackBottom'));
         }
         if (opponent.stack2[1]) {
             if (opponent.stack2[0]) $('#opponent').append(card(opponent.stack2[0], opponent.color + ' stack2 stackBottom'));
-            if (opponent.stack2[1]) $('#opponent').append(cardFunction(opponent.stack2[1], opponent.color + ' stack2 stackTop'));
+            if (opponent.stack2[1]) $('#opponent').append(stackFunction(opponent.stack2[1], opponent.color + ' stack2 stackTop'));
         }
         else if (opponent.stack2[0]) {
-            if (opponent.stack2[0]) $('#opponent').append(cardFunction(opponent.stack2[0], opponent.color + ' stack2 stackBottom'));
+            if (opponent.stack2[0]) $('#opponent').append(stackFunction(opponent.stack2[0], opponent.color + ' stack2 stackBottom'));
         }
     }
 
@@ -372,6 +373,7 @@
         }
 
         .target {
+            display: none;
             width: 1.3em;
             height: 1.3em;
             border: .1em solid blue;
