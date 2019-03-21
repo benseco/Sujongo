@@ -3,6 +3,9 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
+    const ATTR_VALUE = 'data-value';
+    const ATTR_COLOR = 'data-color';
+    const ATTR_POSITION = 'data-position';
     var socket;
 
     function div(attr) {
@@ -26,6 +29,27 @@
         }
     }
 
+    function positionToClass(position)
+    {
+        if (position > 13) position -= 13;
+        switch(position)
+        {
+            case 1: return "row1 col1";
+            case 2: return "row1 col2";
+            case 3: return "row1 col3";
+            case 4: return "row2 col1";
+            case 5: return "row2 col2";
+            case 6: return "row2 col3";
+            case 7: return "row3 col1";
+            case 8: return "row3 col2";
+            case 9: return "row3 col3";
+            case 10: return "stack1 stackBottom";
+            case 11: return "stack1 stackTop";
+            case 12: return "stack2 stackBottom";
+            case 13: return "stack2 stackTop";
+        }
+    }
+
     function selectableDeck(count) {
         return deck(count)
             .hover(function() {
@@ -45,16 +69,27 @@
         $('#player').append(card(drawn.value, drawn.color + ' selected drawn'));
     }
 
+    function onTarget() {
+        let selected = $('.selected');
+        if (!selected) return;
+        socket.emit('target', {
+            destination: $(this).attr(ATTR_POSITION),
+            selected: selected.attr(ATTR_POSITION)
+        });
+    }
+
     function deck(count) {
-        var deck = back('deck');
-        return deck.append(div({text:count,class:'count'}))
+        return back()
+            .addClass('deck')
+            .append(div({text:count,class:'count'}))
     }
 
-    function back(type) {
-        return card('','back ' + type)
+    function back(position) {
+        return card('', '', position)
+            .addClass('back');
     }
 
-    function card(value, type) {
+    function card(value, color, position) {
         var name=valueToName(value);
         return div()
             .addClass('card')
@@ -62,12 +97,16 @@
             .append(div({text:name}))
             .append(div({text:name}))
             .append(div({text:value}))
-            .addClass(type);
+            .addClass(color)
+            .addClass(positionToClass(position))
+            .attr(ATTR_VALUE, value)
+            .attr(ATTR_COLOR, color)
+            .attr(ATTR_POSITION, position);
     }
 
-    function selectableStack(value, type)
+    function selectableStack(value, color, position)
     {
-        return card(value, type)
+        return card(value, color, position)
             .click(function() {
                 $('.selected').removeClass('selected'); 
                 $(this).addClass('selected');
@@ -85,54 +124,54 @@
         var stackFunction = card;
         if (player.turn) { stackFunction = selectableStack; }
 
-        if (player[1]) $('#player').append(card(player[1].value, player[1].color + ' row1 col1'));
-        if (player[2]) $('#player').append(card(player[4].value, player[4].color + ' row1 col2'));
-        if (player[3]) $('#player').append(card(player[7].value, player[7].color + ' row1 col3'));
-        if (player[4]) $('#player').append(card(player[2].value, player[2].color + ' row2 col1'));
-        if (player[5]) $('#player').append(card(player[5].value, player[5].color + ' row2 col2'));
-        if (player[6]) $('#player').append(card(player[8].value, player[8].color + ' row2 col3'));
-        if (player[7]) $('#player').append(card(player[3].value, player[3].color + ' row3 col1'));
-        if (player[8]) $('#player').append(card(player[6].value, player[6].color + ' row3 col2'));
-        if (player[9]) $('#player').append(card(player[9].value, player[9].color + ' row3 col3'));
+        if (player[1]) $('#player').append(card(player[1].value, player[1].color, 1));
+        if (player[2]) $('#player').append(card(player[2].value, player[2].color, 2));
+        if (player[3]) $('#player').append(card(player[3].value, player[3].color, 3));
+        if (player[4]) $('#player').append(card(player[4].value, player[4].color, 4));
+        if (player[5]) $('#player').append(card(player[5].value, player[5].color, 5));
+        if (player[6]) $('#player').append(card(player[6].value, player[6].color, 6));
+        if (player[7]) $('#player').append(card(player[7].value, player[7].color, 7));
+        if (player[8]) $('#player').append(card(player[8].value, player[8].color, 8));
+        if (player[9]) $('#player').append(card(player[9].value, player[9].color, 9));
         if (player.deck) $('#player').append(selectableDeck(player.deck));
         if (player.stack1[1]) {
-            if (player.stack1[0]) $('#player').append(card(player.stack1[0], player.color + ' stack1 stackBottom'));
-            if (player.stack1[1]) $('#player').append(stackFunction(player.stack1[1], player.color + ' stack1 stackTop'));
+            if (player.stack1[0]) $('#player').append(card(player.stack1[0], player.color, 10));
+            if (player.stack1[1]) $('#player').append(stackFunction(player.stack1[1], player.color, 11));
         }
         else if (player.stack1[0]) {
-            if (player.stack1[0]) $('#player').append(stackFunction(player.stack1[0], player.color + ' stack1 stackBottom'));
+            if (player.stack1[0]) $('#player').append(stackFunction(player.stack1[0], player.color, 10));
         }
         if (player.stack2[1]) {
-            if (player.stack2[0]) $('#player').append(card(player.stack2[0], player.color + ' stack2 stackBottom'));
-            if (player.stack2[1]) $('#player').append(stackFunction(player.stack2[1], player.color + ' stack2 stackTop'));
+            if (player.stack2[0]) $('#player').append(card(player.stack2[0], player.color, 12));
+            if (player.stack2[1]) $('#player').append(stackFunction(player.stack2[1], player.color, 13));
         }
         else if (player.stack2[0]) {
-            if (player.stack2[0]) $('#player').append(stackFunction(player.stack2[0], player.color + ' stack2 stackBottom'));
+            if (player.stack2[0]) $('#player').append(stackFunction(player.stack2[0], player.color, 12));
         }
 
-        if (opponent[1]) $('#opponent').append(back('row1 col1'));
-        if (opponent[2]) $('#opponent').append(back('row1 col2'));
-        if (opponent[3]) $('#opponent').append(back('row1 col3'));
-        if (opponent[4]) $('#opponent').append(back('row2 col1'));
-        if (opponent[5]) $('#opponent').append(back('row2 col2'));
-        if (opponent[6]) $('#opponent').append(back('row2 col3'));
-        if (opponent[7]) $('#opponent').append(back('row3 col1'));
-        if (opponent[8]) $('#opponent').append(back('row3 col2'));
-        if (opponent[9]) $('#opponent').append(back('row3 col3'));
+        if (opponent[1]) $('#opponent').append(back(14));
+        if (opponent[2]) $('#opponent').append(back(15));
+        if (opponent[3]) $('#opponent').append(back(16));
+        if (opponent[4]) $('#opponent').append(back(17));
+        if (opponent[5]) $('#opponent').append(back(18));
+        if (opponent[6]) $('#opponent').append(back(19));
+        if (opponent[7]) $('#opponent').append(back(20));
+        if (opponent[8]) $('#opponent').append(back(21));
+        if (opponent[9]) $('#opponent').append(back(22));
         if (opponent.deck) $('#opponent').append(deck(opponent.deck));
         if (opponent.stack1[1]) {
-            if (opponent.stack1[0]) $('#opponent').append(card(opponent.stack1[0], opponent.color + ' stack1 stackBottom'));
-            if (opponent.stack1[1]) $('#opponent').append(stackFunction(opponent.stack1[1], opponent.color + ' stack1 stackTop'));
+            if (opponent.stack1[0]) $('#opponent').append(card(opponent.stack1[0], opponent.color, 23));
+            if (opponent.stack1[1]) $('#opponent').append(stackFunction(opponent.stack1[1], opponent.color, 24));
         }
         else if (opponent.stack1[0]) {
-            if (opponent.stack1[0]) $('#opponent').append(stackFunction(opponent.stack1[0], opponent.color + ' stack1 stackBottom'));
+            if (opponent.stack1[0]) $('#opponent').append(stackFunction(opponent.stack1[0], opponent.color, 23));
         }
         if (opponent.stack2[1]) {
-            if (opponent.stack2[0]) $('#opponent').append(card(opponent.stack2[0], opponent.color + ' stack2 stackBottom'));
-            if (opponent.stack2[1]) $('#opponent').append(stackFunction(opponent.stack2[1], opponent.color + ' stack2 stackTop'));
+            if (opponent.stack2[0]) $('#opponent').append(card(opponent.stack2[0], opponent.color, 25));
+            if (opponent.stack2[1]) $('#opponent').append(stackFunction(opponent.stack2[1], opponent.color, 26));
         }
         else if (opponent.stack2[0]) {
-            if (opponent.stack2[0]) $('#opponent').append(stackFunction(opponent.stack2[0], opponent.color + ' stack2 stackBottom'));
+            if (opponent.stack2[0]) $('#opponent').append(stackFunction(opponent.stack2[0], opponent.color, 25));
         }
     }
 
@@ -167,6 +206,8 @@
                 $(this).val('');
             }
         });
+
+        $('.target').click(onTarget);
 
         resize();
         $(window).resize(resize);
@@ -405,27 +446,27 @@
             </div>
             <div class="opponent">
                 <!--Far stacks-->
-                <div class="target stack1 stackBottom"></div>
-                <div class="target stack1 stackTop"></div>
-                <div class="target stack2 stackBottom"></div>
-                <div class="target stack2 stackTop"></div>
+                <div class="target stack1 stackBottom" data-position="23"></div>
+                <div class="target stack1 stackTop" data-position="24"></div>
+                <div class="target stack2 stackBottom" data-position="25"></div>
+                <div class="target stack2 stackTop" data-position="26"></div>
             </div>
             <div class="player">
                 <!--Near stacks-->
-                <div class="target stack1 stackBottom"></div>
-                <div class="target stack1 stackTop"></div>
-                <div class="target stack2 stackBottom"></div>
-                <div class="target stack2 stackTop"></div>
+                <div class="target stack1 stackBottom" data-position="10"></div>
+                <div class="target stack1 stackTop" data-position="11"></div>
+                <div class="target stack2 stackBottom" data-position="12"></div>
+                <div class="target stack2 stackTop" data-position="13"></div>
                 <!--Hand-->
-                <div class="target row1 col1"></div>
-                <div class="target row1 col2"></div>
-                <div class="target row1 col3"></div>
-                <div class="target row2 col1"></div>
-                <div class="target row2 col2"></div>
-                <div class="target row2 col3"></div>
-                <div class="target row3 col1"></div>
-                <div class="target row3 col2"></div>
-                <div class="target row3 col3"></div>
+                <div class="target row1 col1" data-position="1"></div>
+                <div class="target row1 col2" data-position="2"></div>
+                <div class="target row1 col3" data-position="3"></div>
+                <div class="target row2 col1" data-position="4"></div>
+                <div class="target row2 col2" data-position="5"></div>
+                <div class="target row2 col3" data-position="6"></div>
+                <div class="target row3 col1" data-position="7"></div>
+                <div class="target row3 col2" data-position="8"></div>
+                <div class="target row3 col3" data-position="9"></div>
             </div>
         </div>
         <div id="chat">
